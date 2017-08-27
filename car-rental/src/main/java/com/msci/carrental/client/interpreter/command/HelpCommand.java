@@ -1,46 +1,85 @@
 package com.msci.carrental.client.interpreter.command;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
+import com.msci.carrental.service.CarRentalServiceInterface;
 
 public class HelpCommand implements CommandHandlerInterface {
+	private CarRentalServiceInterface service;
+
+	@Override
+	public void setCarRentalService(CarRentalServiceInterface carRentalServiceInterface) {
+		this.service = carRentalServiceInterface;
+	}
 
 	private List<CommandHandlerInterface> commandList;
 
 	@Override
-	public String getCommand() {
+	public String getCommandName() {
 		return "help";
 	}
 
 	@Override
 	public CommandResult invoke(List<String> parameters) {
 		CommandResult result = new CommandResult();
-		if (parameters.size() == 0) {
-			commandList.stream()
-			.forEach(getHelpText(result));
+		boolean commandFound = false;
+		if (parameters == null || parameters.size() == 0) {
+			commandList.stream().forEach(getHelpText(result));
 		} else {
-			commandList.stream()
-			.filter(commandFilter(parameters))
-			.forEach(getHelpText(result));
+			commandList.stream().filter(commandFilter(parameters)).forEach(getHelpText(result));
 		}
-
+		if (result.getMessages().size()==0) {
+			result.addError("Parameter is not recognized as a command name!");
+		}
 		return result;
 	}
 
 	private Predicate<? super CommandHandlerInterface> commandFilter(List<String> parameters) {
-		return handler -> parameters.stream().anyMatch(handler.getCommand()::equals);
+		return handler -> parameters.stream().anyMatch(handler.getCommandName()::equals);
 	}
 
 	private Consumer<? super CommandHandlerInterface> getHelpText(CommandResult result) {
-		return handler -> 
-		{
-			String text = handler.getCommand() + " " + handler.getUsage() + " " + handler.getDescription();
-			result.addText(text);
+		return handler -> {
+			result.addMessage(CommandResult.getBoldText(handler.getCommandName()));
+			if (handler.getParameterDescription() != null) {
+				handler.getParameterDescription().stream().forEach(appendLinesIntoOneLineInItalic(result));
+			}
+			if (handler.getTagLine() != null) {
+				appendTextToLastLine(result, " - " + handler.getTagLine());
+			}
+
+			if (handler.getCommandDescription() != null) {
+				result.addMessage("");
+				handler.getCommandDescription().stream().forEach(line -> {
+					appendTextToLastLine(result, line);
+				});
+			}
+			
+			result.addMessage("");
+		};
+	}
+
+	private void appendTextToLastLine(CommandResult result, String line) {
+		List<String> messages = result.getMessages();
+		int indexOfLastLine = messages.size() - 1;
+		String lastLine = messages.get(indexOfLastLine);
+		String newLastLine = lastLine + " " + line;
+		messages.set(indexOfLastLine, newLastLine);
+	}
+
+	private Consumer<? super String> appendLinesIntoOneLineInItalic(CommandResult result) {
+		return line -> {
+			List<String> messages = result.getMessages();
+			int indexOfLastLine = messages.size() - 1;
+			String lastLine = messages.get(indexOfLastLine);
+			String newLastLine = lastLine + " " + CommandResult.getItalicText(line);
+			messages.set(indexOfLastLine, newLastLine);
 		};
 	}
 
@@ -50,13 +89,28 @@ public class HelpCommand implements CommandHandlerInterface {
 	}
 
 	@Override
-	public String getDescription() {
-		return "Returns help for commands";
+	public List<String> getCommandDescription() {
+		List<String> result = new ArrayList<>();
+
+		final StringBuilder sb = new StringBuilder();
+
+		commandList.stream().forEach(command -> {
+			sb.append(command.getCommandName() + " ");
+		});
+
+		result.add("*available commands: " + sb.toString());
+
+		return result;
 	}
 
 	@Override
-	public String getUsage() {
-		return "[command]";
+	public List<String> getParameterDescription() {
+		return Arrays.asList("[command1 command2 ... commandN]*");
+	}
+
+	@Override
+	public String getTagLine() {
+		return "Returns help for commands";
 	}
 
 }

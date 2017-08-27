@@ -1,16 +1,19 @@
 package com.msci.carrental.client.application;
 
-import com.msci.carrental.client.gui.CommandWindow;
+import com.msci.carrental.client.gui.ConsoleWindow;
 import com.msci.carrental.client.interpreter.CommandInterpreter;
 
+/**
+ * Main application
+ */
 public class Application {
 
-	private CommandWindow consoleWindow;
+	private ConsoleWindow consoleWindow;
 
 	public Application() {
 		super();
 
-		consoleWindow = new CommandWindow();
+		consoleWindow = new ConsoleWindow();
 		CommandInterpreter.registerCommandInterpreter(consoleWindow);
 
 	}

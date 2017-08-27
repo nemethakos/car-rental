@@ -1,63 +1,84 @@
 package com.msci.carrental.service.model;
 
-public class CarType {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-	public CarType(String description, String categoryGroup, String categoryExample, String carCode,
-			SuitcaseSpecification luggageSpecification, int numberOfPassangers, TransmissionType transmissionType,
-			boolean hasAirConditioning, float fuelConsumptionLiterPer100Km, float co2EmissionGramPerKm) {
-		
-		super();
+public enum CarType {
+
+	CCMR("A", "Suzuki Swift", "Economy, 2-4 Door, Manual, Aircon", 4, 1, 1, false), //
+	CDAR("B", "VW Polo TSI", "Economy, 4-5 Door, Manual, Aircon", 5, 1, 1, false), //
+	CDMR("L", "Opel Corsa", "Economy, 4-5 Door, Automatic, Aircon", 5, 1, 2, false), //
+	CFMR("C", "Hyundai i30", "Compact, 2-4 Door, Manual, Aircon", 5, 1, 2, false); //
+
+	private boolean automaticTransmission;
+
+	private String description;
+
+	private String example;
+
+	private String group;
+
+	private int numberOfLargeSuitcases;
+
+	private int numberOfPassangers;
+
+	private int numberOfSmallSuitcases;
+
+	private CarType(String group, String example, String description, int numberOfPassangers, int numberOfSmallSuitcases,
+			int numberOfLargeSuitcases, boolean automaticTransmission) {
+		this.group = group;
 		this.description = description;
-		this.categoryGroup = categoryGroup;
-		this.categoryExample = categoryExample;
-		this.carCode = carCode;
-		this.luggageSpecification = luggageSpecification;
+		this.example = example;
 		this.numberOfPassangers = numberOfPassangers;
-		this.transmissionType = transmissionType;
-		this.hasAirConditioning = hasAirConditioning;
-		this.fuelConsumptionLiterPer100Km = fuelConsumptionLiterPer100Km;
-		this.co2EmissionGramPerKm = co2EmissionGramPerKm;
+		this.numberOfSmallSuitcases = numberOfSmallSuitcases;
+		this.numberOfLargeSuitcases = numberOfLargeSuitcases;
+		this.automaticTransmission = automaticTransmission;
 	}
 	
-	private String description;
-	private String categoryGroup;
-	private String categoryExample;
-	private String carCode;
-	private SuitcaseSpecification luggageSpecification;
-	private int numberOfPassangers;
-	private TransmissionType transmissionType;
-	private boolean hasAirConditioning;
-	private float fuelConsumptionLiterPer100Km;
-	private float co2EmissionGramPerKm;
+	public static CarType getCarTypeFromCode(String groupCode) {
+		CarType result = null;
+		try {
+			result = CarType.valueOf(groupCode.trim().toUpperCase());
+		} catch (IllegalArgumentException e) {
+			// not found;
+		}
+		return result;
+
+	}
+	
+	public static List<String> getListOfCarTypes() {
+		List<String> result = new ArrayList<>();
+		
+		Arrays.asList(CarType.values()).stream().forEach(carType -> result.add(carType.name()));		
+		
+		return result ;
+	}
+	
+	
 	
 	public String getDescription() {
 		return description;
 	}
-	public String getCategoryGroup() {
-		return categoryGroup;
+	public String getExample() {
+		return example;
 	}
-	public String getCategoryExample() {
-		return categoryExample;
+	public String getGroup() {
+		return group;
 	}
-	public String getCarCode() {
-		return carCode;
-	}
-	public SuitcaseSpecification getLuggageSpecification() {
-		return luggageSpecification;
+	public int getNumberOfLargeSuitcases() {
+		return numberOfLargeSuitcases;
 	}
 	public int getNumberOfPassangers() {
 		return numberOfPassangers;
 	}
-	public TransmissionType getTransmissionType() {
-		return transmissionType;
+
+	public int getNumberOfSmallSuitcases() {
+		return numberOfSmallSuitcases;
 	}
-	public boolean isHasAirConditioning() {
-		return hasAirConditioning;
+
+	public boolean isAutomaticTransmission() {
+		return automaticTransmission;
 	}
-	public float getFuelConsumptionLiterPer100Km() {
-		return fuelConsumptionLiterPer100Km;
-	}
-	public float getCo2EmissionGramPerKm() {
-		return co2EmissionGramPerKm;
-	}
+
 }
