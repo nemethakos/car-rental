@@ -1,4 +1,4 @@
-package com.msci.carrental.client.gui;
+package com.msci.carrental.client.gui.implementation;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -23,13 +23,17 @@ import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
+import com.msci.carrental.client.gui.CommandReceiverCallBackInterface;
+import com.msci.carrental.client.gui.ConsoleWindowInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
-import com.msci.carrental.client.interpreter.DecorationType;
-import com.msci.carrental.client.interpreter.TextDecoratorInterface;
-import com.msci.carrental.service.BookingResult;
+import com.msci.carrental.client.util.DecorationType;
+import com.msci.carrental.client.util.TextDecoratorInterface;
+import com.msci.carrental.client.util.Util;
+import com.msci.carrental.service.model.BookingResult;
 
 public class ConsoleWindow implements ConsoleWindowInterface, TextDecoratorInterface {
 
@@ -46,7 +50,7 @@ public class ConsoleWindow implements ConsoleWindowInterface, TextDecoratorInter
 	private final JPanel consolePanel = new JPanel();
 	private final JPanel mainPanel = new JPanel();
 	private final JPanel commandPanel = new JPanel();
-	private final JFrame mainFrame = new JFrame();
+	final JFrame mainFrame = new JFrame();
 
 	public void runMainLoop() {
 		EventQueue.invokeLater(new Runnable() {
@@ -67,7 +71,7 @@ public class ConsoleWindow implements ConsoleWindowInterface, TextDecoratorInter
 		initialize();
 	}
 
-	private void updateCommandButtonEnabledStatus() {
+	void updateCommandButtonEnabledStatus() {
 		commandButton.setEnabled(isCommandTextValid());
 	}
 
@@ -78,13 +82,13 @@ public class ConsoleWindow implements ConsoleWindowInterface, TextDecoratorInter
 				try {
 
 					kit.insertHTML(doc, doc.getLength(), htmlText, 0, 0, null);
-					scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
+					int len = consoleText.getDocument().getLength();
+					consoleText.setCaretPosition(len);
 				} catch (Exception e) {
 					log.log(Level.SEVERE, "Error inserting HTML text into console: '" + htmlText + "'", e);
 				}
 			}
 		});
-
 	}
 
 	/**
@@ -115,6 +119,9 @@ public class ConsoleWindow implements ConsoleWindowInterface, TextDecoratorInter
 		consoleText.setEditable(false);
 		consoleText.setEditorKit(kit);
 		consoleText.setDocument(doc);
+		DefaultCaret caret = (DefaultCaret) consoleText.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
 	}
 
 	private void initMainPanel() {
@@ -138,8 +145,8 @@ public class ConsoleWindow implements ConsoleWindowInterface, TextDecoratorInter
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		Point centerPoint = ge.getCenterPoint();
 
-		mainFrame.setBounds(new Rectangle(0, 0, (int) ge.getMaximumWindowBounds().getWidth() / 2,
-				(int) ge.getMaximumWindowBounds().getHeight() / 2));
+		mainFrame.setBounds(new Rectangle(0, 0, (int) (ge.getMaximumWindowBounds().getWidth() * 0.7),
+				(int) (ge.getMaximumWindowBounds().getHeight() * 0.7 )));
 		Dimension windowSize = mainFrame.getSize();
 		int dx = centerPoint.x - windowSize.width / 2;
 		int dy = centerPoint.y - windowSize.height / 2;
@@ -191,7 +198,7 @@ public class ConsoleWindow implements ConsoleWindowInterface, TextDecoratorInter
 		commandText.setText("");
 	}
 
-	private void commandButtonPressedEventHandler() {
+	void commandButtonPressedEventHandler() {
 		if (isCommandTextValid()) {
 			notifiyCommandReceiver(commandText.getText());
 			clearCommandText();
@@ -218,14 +225,14 @@ public class ConsoleWindow implements ConsoleWindowInterface, TextDecoratorInter
 
 		for (String line : message.getMessages()) {
 			sb.append("<p style=\"font-size: 15px;\">");
-			sb.append(CommandResult.decorate(line, this));
+			sb.append(Util.decorate(line, this));
 			sb.append("</p>");
 
 		}
 
 		for (String error : message.getErrors()) {
 			sb.append("<p style=\"color: red;font-size: 15px;\">");
-			sb.append(CommandResult.decorate(error, this));
+			sb.append(Util.decorate(error, this));
 			sb.append("</p>");
 
 		}
@@ -236,16 +243,13 @@ public class ConsoleWindow implements ConsoleWindowInterface, TextDecoratorInter
 
 	@Override
 	public void sendBookingResult(BookingResult bookingResult) {
-		StringBuilder sb = new StringBuilder();
+		CommandResult result = new CommandResult();
 
-		sb.append("Booking result received for reference: ");
-		sb.append(bookingResult.getReference());
-		sb.append("Booking request was: ");
-		sb.append(bookingResult.getBookingRequest());
-		sb.append("Booking status: ");
-		sb.append(bookingResult.getBookingStatus());
+		result.addMessage(Util.getBoldText("< Booking result received") + Util.getItalicText(" for reference: ")
+				+ Util.getBoldText(String.valueOf(bookingResult.getReference())));
+		Util.addBookingResultTo(result, bookingResult);
 
-		addHTMLTextToConsole(sb.toString());
+		sendCommandResult(result);
 
 	}
 
@@ -253,6 +257,19 @@ public class ConsoleWindow implements ConsoleWindowInterface, TextDecoratorInter
 	public String getDecorationFor(DecorationType decorationType) {
 		String result = "";
 		switch (decorationType) {
+		case CODE_START: {
+			result = "<span style=\"color: green; font-weight: bold; font-family: monospace; \">";
+			break;
+		}
+		case HEAD_START: {
+			result = "<div style=\"color: #909090; text-align: center; font-size: 20px;font-weight: bold;\">";
+			break;
+		}
+		case HEAD_END: {
+			result = "</div>";
+			break;
+			
+		}
 		case BOLD_START: {
 			result = "<span style=\"font-weight: bold;\">";
 			break;

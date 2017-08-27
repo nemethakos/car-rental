@@ -1,9 +1,5 @@
 package com.msci.carrental.service.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public enum CarType {
 
 	CCMR("A", "Suzuki Swift", "Economy, 2-4 Door, Manual, Aircon", 4, 1, 1, false), //
@@ -35,27 +31,6 @@ public enum CarType {
 		this.numberOfLargeSuitcases = numberOfLargeSuitcases;
 		this.automaticTransmission = automaticTransmission;
 	}
-	
-	public static CarType getCarTypeFromCode(String groupCode) {
-		CarType result = null;
-		try {
-			result = CarType.valueOf(groupCode.trim().toUpperCase());
-		} catch (IllegalArgumentException e) {
-			// not found;
-		}
-		return result;
-
-	}
-	
-	public static List<String> getListOfCarTypes() {
-		List<String> result = new ArrayList<>();
-		
-		Arrays.asList(CarType.values()).stream().forEach(carType -> result.add(carType.name()));		
-		
-		return result ;
-	}
-	
-	
 	
 	public String getDescription() {
 		return description;

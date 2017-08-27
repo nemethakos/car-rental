@@ -4,29 +4,39 @@ import java.util.List;
 
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
+import com.msci.carrental.client.util.Util;
 import com.msci.carrental.service.CarRentalServiceInterface;
+import com.msci.carrental.service.model.Booking;
 
-public class ListOfCarsAvailableForRentCommand implements CommandHandlerInterface {
+public class DisplayAllBookingsCommand implements CommandHandlerInterface {
 	private CarRentalServiceInterface service;
-	
+
 	@Override
 	public void setCarRentalService(CarRentalServiceInterface carRentalServiceInterface) {
 		this.service = carRentalServiceInterface;
 	}
+
 	@Override
 	public String getCommandName() {
-		return "list";
+		return "bookings";
 	}
 
 	@Override
 	public CommandResult invoke(List<String> parameters) {
 		CommandResult result = new CommandResult();
-		result.addMessage("List of car type codes available for rent:");
-		service.getAvailableCarsForRental().stream().forEach(
-				carType->result.addMessage(
-						carType.name()));
-		
-		return result ;
+
+		if (!parameters.isEmpty()) {
+			result.addError("No parameters allowed!");
+		} else {
+			List<Booking> allBookings = service.getAllBookings();
+			if (allBookings.isEmpty()) {
+				result.addMessage("No bookings yet!");
+			} else {
+				result.addMessage(String.valueOf(allBookings.size()) + " Bookings:");
+				Util.addAllBookingsTo(result, allBookings);
+			}
+		}
+		return result;
 	}
 
 	@Override
@@ -38,10 +48,11 @@ public class ListOfCarsAvailableForRentCommand implements CommandHandlerInterfac
 	public List<String> getParameterDescription() {
 		return null;
 	}
+
 	@Override
 	public String getTagLine() {
 
-		return "Returns the list of available car types for rent";
+		return "Returns the list of all bookings";
 	}
 
 }

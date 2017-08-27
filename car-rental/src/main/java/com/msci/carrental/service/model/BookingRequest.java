@@ -1,10 +1,7 @@
-package com.msci.carrental.service;
+package com.msci.carrental.service.model;
 
 import java.util.Date;
 import java.util.List;
-
-import com.msci.carrental.service.model.CarType;
-import com.msci.carrental.service.model.Country;
 
 public class BookingRequest {
 	private CarType carType;

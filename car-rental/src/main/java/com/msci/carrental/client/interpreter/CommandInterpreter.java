@@ -9,12 +9,15 @@ import java.util.stream.Collectors;
 import com.msci.carrental.client.gui.CommandReceiverCallBackInterface;
 import com.msci.carrental.client.gui.ConsoleWindowInterface;
 import com.msci.carrental.client.interpreter.command.BookACarCommand;
+import com.msci.carrental.client.interpreter.command.DisplayAllBookingsCommand;
 import com.msci.carrental.client.interpreter.command.HelpCommand;
 import com.msci.carrental.client.interpreter.command.ListOfCarsAvailableForRentCommand;
 import com.msci.carrental.client.interpreter.command.ReturnsDetailedSpecsOfACarCommand;
-import com.msci.carrental.service.BookingResult;
+import com.msci.carrental.client.interpreter.command.StressTestCommand;
+import com.msci.carrental.client.util.Util;
 import com.msci.carrental.service.BookingResultReceiverInterface;
 import com.msci.carrental.service.CarRentalServiceInterface;
+import com.msci.carrental.service.model.BookingResult;
 import com.msci.carrental.service.proxy.CarRentalServiceProxy;
 
 public class CommandInterpreter implements CommandReceiverCallBackInterface, BookingResultReceiverInterface {
@@ -40,6 +43,8 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 		commandHandlers.add(new ListOfCarsAvailableForRentCommand());
 		commandHandlers.add(new ReturnsDetailedSpecsOfACarCommand());
 		commandHandlers.add(new BookACarCommand());
+		commandHandlers.add(new DisplayAllBookingsCommand());
+		commandHandlers.add(new StressTestCommand());
 		
 		commandHandlers.stream().forEach(handler->handler.setCarRentalService(carRentalService));
 		
@@ -48,7 +53,8 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 
 	private void printWelcomeMessage() {
 		CommandResult result = new CommandResult();
-		result.addMessage("MSCI Car Rental Service Demo");
+		result.addMessage(Util.getHeadText("MSCI Car Rental Service Demo"));
+		result.addMessage("");
 		CommandResult helpResult = helpCommand.invoke(null);
 		result.getMessages().addAll(helpResult.getMessages());
 		commandWindow.sendCommandResult(result);
@@ -85,7 +91,7 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 					commandParameters.addAll(parametersList);
 				}
 				result = optional.get().invoke(commandParameters);
-				result.getMessages().add(0, CommandResult.getBoldText("> " + String.join(" ", words)));
+				result.getMessages().add(0, Util.getBoldText("> " + String.join(" ", words)));
 			} else {
 				result = new CommandResult("command not found: \"" + commandName + "\"", true);
 			}
@@ -93,7 +99,7 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 		return result;
 	}
 
-	private List<String> getWords(String commandSentence) {
+	private static List<String> getWords(String commandSentence) {
 
 		List<String> result = new ArrayList<>();
 

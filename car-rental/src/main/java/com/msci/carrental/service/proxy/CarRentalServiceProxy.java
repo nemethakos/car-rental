@@ -2,10 +2,11 @@ package com.msci.carrental.service.proxy;
 
 import java.util.List;
 
-import com.msci.carrental.service.BookingRequest;
 import com.msci.carrental.service.BookingResultReceiverInterface;
 import com.msci.carrental.service.CarRentalServiceInterface;
 import com.msci.carrental.service.implementation.CarRentalServiceImplementation;
+import com.msci.carrental.service.model.Booking;
+import com.msci.carrental.service.model.BookingRequest;
 import com.msci.carrental.service.model.CarSpecification;
 import com.msci.carrental.service.model.CarType;
 
@@ -41,6 +42,11 @@ public class CarRentalServiceProxy implements CarRentalServiceInterface {
 	public void setBookingResultReceiver(BookingResultReceiverInterface bookingResultReceiver) {
 		carRentalServiceImplementation.setBookingResultReceiver(bookingResultReceiver);
 
+	}
+
+	@Override
+	public List<Booking> getAllBookings() {
+		return carRentalServiceImplementation.getAllBookings();
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
+import com.msci.carrental.client.util.Util;
 import com.msci.carrental.service.CarRentalServiceInterface;
 import com.msci.carrental.service.model.CarSpecification;
 import com.msci.carrental.service.model.CarType;
@@ -36,7 +37,7 @@ public class ReturnsDetailedSpecsOfACarCommand implements CommandHandlerInterfac
 		} else {
 
 			String carCode = parameters.get(0).trim().toUpperCase();
-			CarType carType = CarType.getCarTypeFromCode(carCode);
+			CarType carType = Util.getCarTypeFromCarTypeCode(carCode);
 			if (carType == null) {
 				result.addError("Unknown car code: " + carCode);
 			} else {
@@ -63,7 +64,7 @@ public class ReturnsDetailedSpecsOfACarCommand implements CommandHandlerInterfac
 	@Override
 	public List<String> getCommandDescription() {
 		ArrayList<String> result = new ArrayList<>();
-		result.add("* car codes: " + String.join(", ", CarType.getListOfCarTypes()));
+		result.add("* car codes: " + String.join(", ", Util.getListOfCarTypeCodes()));
 		return result;
 	}
 

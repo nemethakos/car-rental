@@ -1,6 +1,6 @@
 package com.msci.carrental.client.application;
 
-import com.msci.carrental.client.gui.ConsoleWindow;
+import com.msci.carrental.client.gui.implementation.ConsoleWindow;
 import com.msci.carrental.client.interpreter.CommandInterpreter;
 
 /**

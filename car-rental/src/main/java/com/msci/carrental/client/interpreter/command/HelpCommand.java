@@ -8,14 +8,13 @@ import java.util.function.Predicate;
 
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
+import com.msci.carrental.client.util.Util;
 import com.msci.carrental.service.CarRentalServiceInterface;
 
 public class HelpCommand implements CommandHandlerInterface {
-	private CarRentalServiceInterface service;
 
 	@Override
 	public void setCarRentalService(CarRentalServiceInterface carRentalServiceInterface) {
-		this.service = carRentalServiceInterface;
 	}
 
 	private List<CommandHandlerInterface> commandList;
@@ -28,7 +27,6 @@ public class HelpCommand implements CommandHandlerInterface {
 	@Override
 	public CommandResult invoke(List<String> parameters) {
 		CommandResult result = new CommandResult();
-		boolean commandFound = false;
 		if (parameters == null || parameters.size() == 0) {
 			commandList.stream().forEach(getHelpText(result));
 		} else {
@@ -40,46 +38,28 @@ public class HelpCommand implements CommandHandlerInterface {
 		return result;
 	}
 
-	private Predicate<? super CommandHandlerInterface> commandFilter(List<String> parameters) {
+	private static Predicate<? super CommandHandlerInterface> commandFilter(List<String> parameters) {
 		return handler -> parameters.stream().anyMatch(handler.getCommandName()::equals);
 	}
 
-	private Consumer<? super CommandHandlerInterface> getHelpText(CommandResult result) {
+	private static Consumer<? super CommandHandlerInterface> getHelpText(CommandResult result) {
 		return handler -> {
-			result.addMessage(CommandResult.getBoldText(handler.getCommandName()));
+			result.addMessage(Util.getBoldText(handler.getCommandName()));
 			if (handler.getParameterDescription() != null) {
-				handler.getParameterDescription().stream().forEach(appendLinesIntoOneLineInItalic(result));
+				handler.getParameterDescription().stream().forEach(Util.appendLinesIntoOneLineInItalic(result));
 			}
 			if (handler.getTagLine() != null) {
-				appendTextToLastLine(result, " - " + handler.getTagLine());
+				Util.appendTextToLastLine(result, " - " + handler.getTagLine());
 			}
 
 			if (handler.getCommandDescription() != null) {
 				result.addMessage("");
 				handler.getCommandDescription().stream().forEach(line -> {
-					appendTextToLastLine(result, line);
+					Util.appendTextToLastLine(result, line);
 				});
 			}
 			
 			result.addMessage("");
-		};
-	}
-
-	private void appendTextToLastLine(CommandResult result, String line) {
-		List<String> messages = result.getMessages();
-		int indexOfLastLine = messages.size() - 1;
-		String lastLine = messages.get(indexOfLastLine);
-		String newLastLine = lastLine + " " + line;
-		messages.set(indexOfLastLine, newLastLine);
-	}
-
-	private Consumer<? super String> appendLinesIntoOneLineInItalic(CommandResult result) {
-		return line -> {
-			List<String> messages = result.getMessages();
-			int indexOfLastLine = messages.size() - 1;
-			String lastLine = messages.get(indexOfLastLine);
-			String newLastLine = lastLine + " " + CommandResult.getItalicText(line);
-			messages.set(indexOfLastLine, newLastLine);
 		};
 	}
 

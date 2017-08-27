@@ -1,7 +1,7 @@
 package com.msci.carrental.client.gui;
 
 import com.msci.carrental.client.interpreter.CommandResult;
-import com.msci.carrental.service.BookingResult;
+import com.msci.carrental.service.model.BookingResult;
 
 public interface ConsoleWindowInterface {
 

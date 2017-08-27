@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Result of executing a command
+ * Result of executing a command.
+ * <ul>
+ * <li>The <code>messages</code> lists the normal messages.
+ * <li>The <code>errors</code> lists the error messages.
+ * </ul>
  */
 public class CommandResult {
 
@@ -46,31 +50,5 @@ public class CommandResult {
 
 	public boolean isError() {
 		return errors.size() > 0;
-	}
-
-	public static String getBoldText(String text) {
-		return DecorationType.BOLD_START.getMarking() + text + DecorationType.BOLD_END.getMarking();
-	}
-
-	public static String getItalicText(String text) {
-		return DecorationType.ITALIC_START.getMarking() + text + DecorationType.ITALIC_END.getMarking();
-
-	}
-
-	/**
-	 * Decorates the plain text with markings into decorated (e.g.: HTML) text
-	 * 
-	 * @param text
-	 *            the input text
-	 * @param decorator
-	 *            the {@link TextDecoratorInterface}
-	 * @return the decorated text
-	 */
-	public static String decorate(String text, TextDecoratorInterface decorator) {
-		String result = new String(text);
-		for (DecorationType decorationType : DecorationType.values()) {
-			result = result.replace(decorationType.getMarking(), decorator.getDecorationFor(decorationType));
-		}
-		return result;
 	}
 }
