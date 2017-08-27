@@ -78,7 +78,7 @@ public class ConsoleWindow implements ConsoleWindowInterface, TextDecoratorInter
 				try {
 
 					kit.insertHTML(doc, doc.getLength(), htmlText, 0, 0, null);
-					scrollPane.scrollRectToVisible(new Rectangle(0, consoleText.getBounds(null).height, 1, 1));
+					scrollPane.getVerticalScrollBar().setValue(scrollPane.getVerticalScrollBar().getMaximum());
 				} catch (Exception e) {
 					log.log(Level.SEVERE, "Error inserting HTML text into console: '" + htmlText + "'", e);
 				}
