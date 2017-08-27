@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.msci.carrental.client.gui.CommandReceiverCallBackInterface;
-import com.msci.carrental.client.gui.ConsoleWindow;
 import com.msci.carrental.client.gui.ConsoleWindowInterface;
 import com.msci.carrental.client.interpreter.command.BookACarCommand;
 import com.msci.carrental.client.interpreter.command.HelpCommand;
@@ -59,7 +58,7 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 	public static CommandInterpreter registerCommandInterpreter(ConsoleWindowInterface commandWindow) {
 		return new CommandInterpreter(commandWindow);
 	}
-
+	
 	@Override
 	public void receiveBookingResult(BookingResult bookingResult) {
 		commandWindow.sendBookingResult(bookingResult);
@@ -69,8 +68,6 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 		List<String> words = getWords(command);
 		CommandResult result = interpret(words);
 		commandWindow.sendCommandResult(result);
-		
-		//commandWindow.sendPlainTextMessage("\r\n\r\n"+result.getMessages().stream().map(line -> line + "\r\n").collect(Collectors.joining()), result.isError() );
 	}
 
 	private CommandResult interpret(List<String> words) {
