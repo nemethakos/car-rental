@@ -12,6 +12,7 @@ import javax.xml.soap.SOAPFault;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import com.msci.carrental.service.CarRentalServiceInterface;
+import com.msci.carrental.service.implementation.util.Util;
 import com.msci.carrental.service.model.BookingRequest;
 import com.msci.carrental.service.model.BookingResult;
 import com.msci.carrental.service.model.CarInstance;
@@ -42,12 +43,13 @@ public class CarRentalServiceImplementation implements CarRentalServiceInterface
 			throw new SOAPFaultException(getFault("bookingRequest should be non null!"));
 		} else {
 
-			log.info(bookingRequest.toString());
-			String validationMessage = bookingRequest.getValidationMessage();
-			if (!validationMessage.isEmpty()) {
-				throw new SOAPFaultException(getFault(validationMessage));
+			List<String> errors = Util.validateBookingRequest(bookingRequest);
+			if (!errors.isEmpty()) {
+				log.info("Invalid booking request! Problems: '" + errors + "', request: " + bookingRequest.toString());
+				throw new SOAPFaultException(getFault(errors.toString()));
 			} else {
 				result = businessLogic.bookACar(bookingRequest);
+				log.info("Booking Id: " + result + " for booking request: " + bookingRequest.toString());
 			}
 		}
 		return result;
@@ -83,7 +85,7 @@ public class CarRentalServiceImplementation implements CarRentalServiceInterface
 			log.info(carSpecification.toString());
 			return carSpecification;
 		} else {
-			throw new SOAPFaultException(getFault("carType should not be null!"));
+			throw new SOAPFaultException(getFault("carType was invalid or not specified! Valid values are: " + Util.getValidCarTypes()));
 		}
 	}
 

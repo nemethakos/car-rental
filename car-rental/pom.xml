@@ -49,6 +49,28 @@
 				<configuration>
 					<mainClass>com.msci.carrental.client.application.Application</mainClass>
 				</configuration>
+				
+				<executions>
+                <execution>
+                    <id>server</id>
+                    <goals>
+                        <goal>java</goal>
+                    </goals>
+                    <configuration>
+                        <mainClass>com.msci.carrental.service.implementation.CarRentalServicePublisher</mainClass>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>client</id>
+                    <goals>
+                        <goal>java</goal>
+                    </goals>
+                    <configuration>
+                        <mainClass>com.msci.carrental.client.application.Application</mainClass>
+                    </configuration>
+                </execution>
+            </executions>
+				
 			</plugin>
 		</plugins>
 	</build>

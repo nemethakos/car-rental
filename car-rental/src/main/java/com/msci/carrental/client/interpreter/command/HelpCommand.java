@@ -9,7 +9,9 @@ import java.util.function.Predicate;
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
 import com.msci.carrental.client.util.Util;
-import com.msci.carrental.service.CarRentalServiceInterface;
+import com.msci.carrental.client.ws.CarRentalServiceInterface;
+
+
 
 public class HelpCommand implements CommandHandlerInterface {
 

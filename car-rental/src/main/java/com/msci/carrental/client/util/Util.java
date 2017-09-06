@@ -6,15 +6,23 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import com.msci.carrental.client.interpreter.CommandResult;
-import com.msci.carrental.service.model.BookingRequest;
-import com.msci.carrental.service.model.BookingResult;
-import com.msci.carrental.service.model.CarType;
-import com.msci.carrental.service.model.Country;
+import com.msci.carrental.client.ws.BookingRequest;
+import com.msci.carrental.client.ws.BookingResult;
+import com.msci.carrental.client.ws.CarInstance;
+import com.msci.carrental.client.ws.CarType;
+import com.msci.carrental.client.ws.Country;
 
 public class Util {
 	public static final String DATE_FORMAT_STRING = "yyyyMMdd";
@@ -25,14 +33,21 @@ public class Util {
 
 	private static final Random RANDOM = new Random();
 
+	private static Logger log = Logger.getLogger(Util.class.getName());
+
 	public static void addAllBookingsTo(CommandResult result, List<BookingResult> allBookings) {
 		allBookings.stream().forEach(booking -> {
 			BookingRequest b = booking.getBookingRequest();
 			result.addMessage("Booking Id: " + getBoldText(String.valueOf(booking.getReference())));
 			result.addMessage("Car Code Type: " + getBoldText(b.getCarType().name()));
-			result.addMessage("Start Date: " + getBoldText(getDateString(b.getStartDate())));
-			result.addMessage("End Date: " + getBoldText(getDateString(b.getEndDate())));
-			result.addMessage("Countries: " + getBoldText(String.join(", ", getStringList(b.getCountries()))));
+			result.addMessage(getBoldText(getDateString(b.getStartDate())) + " - " + getBoldText(getDateString(b.getEndDate())));
+			
+			for (CarInstance i: booking.getCarInstances()) {
+				result.addMessage(getBoldText(i.getCountry() + " - " + i.getNumberPlate()));
+			}
+			
+			
+			
 			result.addMessage("");
 		});
 	}
@@ -123,8 +138,8 @@ public class Util {
 
 	}
 
-	public static String getDateString(Date b) {
-		return DATE_FORMAT.format(b);
+	public static String getDateString(XMLGregorianCalendar xmlGregorianCalendar) {
+		return xmlGregorianCalendar.toString();
 	}
 
 	public static String getHeadText(String text) {
@@ -192,6 +207,28 @@ public class Util {
 		}
 
 		return dateResult;
+	}
+
+	public static XMLGregorianCalendar getXmlGregorianCalendar(Date date) {
+		GregorianCalendar c = new GregorianCalendar();
+		c.setTime(date);
+		XMLGregorianCalendar result = null;
+		try {
+			result = DatatypeFactory.newInstance().newXMLGregorianCalendar(c);
+		} catch (DatatypeConfigurationException e) {
+			log.log(Level.SEVERE, "Error converting date to XMLGregorianCalendar!", e);
+		}
+		return result;
+	}
+
+	public static BookingRequest getBookingRequest(List<Country> countries, CarType carType, Date startDate,
+			Date endDate) {
+		BookingRequest bookingRequest = new BookingRequest();
+		bookingRequest.setCarType(carType);
+		bookingRequest.setStartDate(getXmlGregorianCalendar(startDate));
+		bookingRequest.setEndDate(getXmlGregorianCalendar(endDate));
+		bookingRequest.getCountries().addAll(countries);
+		return bookingRequest;
 	}
 
 }

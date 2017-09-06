@@ -1,25 +1,28 @@
 package com.msci.carrental.service.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+import com.msci.carrental.service.implementation.util.Util;
+
 @XmlType
 public class BookingRequest {
 
 	@XmlElement(nillable = false)
-	private CarType carType;
+	public CarType carType;
 
 	@XmlElement(nillable = false)
-	private List<Country> countries;
+	public List<Country> countries;
 
 	@XmlElement(nillable = false)
 	private Date endDate;
 
 	@XmlElement(nillable = false)
-	private Date startDate;
+	public Date startDate;
 
 	public BookingRequest() {
 		super();
@@ -27,9 +30,12 @@ public class BookingRequest {
 
 	public BookingRequest(CarType carType, Date startDate, Date endDate, List<Country> countries) {
 		this.carType = carType;
-		this.startDate = startDate;
-		this.endDate = endDate;
-		this.countries = countries;
+		this.startDate = Util.normalizeDate(startDate);
+		this.endDate = Util.normalizeDate(endDate);
+		this.countries = new ArrayList<>();
+		if (countries != null) {
+			this.countries.addAll(countries);
+		}
 	}
 
 	public CarType getCarType() {
@@ -37,6 +43,9 @@ public class BookingRequest {
 	}
 
 	public List<Country> getCountries() {
+		if (countries == null) {
+			countries = new ArrayList<>();
+		}
 		return countries;
 	}
 
@@ -46,25 +55,6 @@ public class BookingRequest {
 
 	public Date getStartDate() {
 		return startDate;
-	}
-
-	public String getValidationMessage() {
-		StringBuilder sb = new StringBuilder();
-
-		if (carType == null) {
-			sb.append("carType should be non null!\r\n");
-		}
-		if (startDate == null) {
-			sb.append("startDate should be non null!\r\n");
-		}
-		if (startDate == null) {
-			sb.append("endDate should be non null!\r\n");
-		}
-		if (countries == null) {
-			sb.append("countries should be non null!\r\n");
-		}
-
-		return sb.toString();
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package com.msci.carrental.client.interpreter;
 
 import java.util.List;
 
-import com.msci.carrental.service.CarRentalServiceInterface;
+import com.msci.carrental.client.ws.CarRentalServiceInterface;
 
 /**
  * Interface for command handlers

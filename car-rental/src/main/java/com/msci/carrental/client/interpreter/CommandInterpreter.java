@@ -1,9 +1,11 @@
 package com.msci.carrental.client.interpreter;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.msci.carrental.client.gui.CommandReceiverCallBackInterface;
@@ -15,11 +17,10 @@ import com.msci.carrental.client.interpreter.command.ListOfCarsAvailableForRentC
 import com.msci.carrental.client.interpreter.command.ReturnsDetailedSpecsOfACarCommand;
 import com.msci.carrental.client.interpreter.command.StressTestCommand;
 import com.msci.carrental.client.util.Util;
-import com.msci.carrental.service.BookingResultReceiverInterface;
-import com.msci.carrental.service.CarRentalServiceInterface;
-import com.msci.carrental.service.model.BookingResult;
+import com.msci.carrental.client.ws.CarRentalServiceInterface;
+import com.msci.carrental.client.ws.WebServiceProxy;
 
-public class CommandInterpreter implements CommandReceiverCallBackInterface, BookingResultReceiverInterface {
+public class CommandInterpreter implements CommandReceiverCallBackInterface {
 	private ConsoleWindowInterface commandWindow;
 	private CarRentalServiceInterface carRentalService;
 	private List<CommandHandlerInterface> commandHandlers;
@@ -29,6 +30,11 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 		super();
 		this.commandWindow = commandWindow;
 		this.commandWindow.setCommandReceiverCallback(this);
+		try {
+			carRentalService = WebServiceProxy.getInstance();
+		} catch (MalformedURLException e) {
+			commandWindow.sendCommandResult(new CommandResult("Error getting Web Service Proxy", true));
+		}
 		initCommandHandlers();
 	}
 
@@ -42,9 +48,9 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 		commandHandlers.add(new BookACarCommand());
 		commandHandlers.add(new DisplayAllBookingsCommand());
 		commandHandlers.add(new StressTestCommand());
-		
-		commandHandlers.stream().forEach(handler->handler.setCarRentalService(carRentalService));
-		
+
+		commandHandlers.stream().forEach(handler -> handler.setCarRentalService(carRentalService));
+
 		printWelcomeMessage();
 	}
 
@@ -55,22 +61,21 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 		CommandResult helpResult = helpCommand.invoke(null);
 		result.getMessages().addAll(helpResult.getMessages());
 		commandWindow.sendCommandResult(result);
-		
+
 	}
 
 	public static CommandInterpreter registerCommandInterpreter(ConsoleWindowInterface commandWindow) {
 		return new CommandInterpreter(commandWindow);
 	}
-	
-	@Override
-	public void receiveBookingResult(BookingResult bookingResult) {
-		commandWindow.sendBookingResult(bookingResult);
-	}
 
 	public void commandReceived(String command) {
-		List<String> words = getWords(command);
-		CommandResult result = interpret(words);
-		commandWindow.sendCommandResult(result);
+		if (carRentalService == null) {
+			commandWindow.sendCommandResult(new CommandResult("No Web Service Proxy, cannot execute command!", true));
+		} else {
+			List<String> words = getWords(command);
+			CommandResult result = interpret(words);
+			commandWindow.sendCommandResult(result);
+		}
 	}
 
 	private CommandResult interpret(List<String> words) {
@@ -87,7 +92,11 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 					List<String> parametersList = words.subList(1, words.size());
 					commandParameters.addAll(parametersList);
 				}
-				result = optional.get().invoke(commandParameters);
+				try {
+					result = optional.get().invoke(commandParameters);
+				} catch (Throwable t) {
+					commandWindow.sendCommandResult(new CommandResult("Error executing command: " + t.getMessage(), true));
+				}
 				result.getMessages().add(0, Util.getBoldText("> " + String.join(" ", words)));
 			} else {
 				result = new CommandResult("command not found: \"" + commandName + "\"", true);
@@ -110,5 +119,4 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 		return result;
 	}
 
-	
 }

@@ -1,5 +1,6 @@
 package com.msci.carrental.service.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -12,16 +13,16 @@ public class BookingSearchResult extends HashMap<Country, List<CarInstance>> {
 
 	public BookingStatus getBookingStatus(List<Country> countries) {
 		boolean bookingSuccessful = true;
-		StringBuilder sb = new StringBuilder();
+		List<String> problems = new ArrayList<>();
 
 		for (Country country : countries) {
 			if (this.containsKey(country) && this.get(country).isEmpty()) {
-				sb.append("No car available for " + country + "\r\n");
+				problems.add("No car from the desired type available for the desired booking time interval for " + country);
 				bookingSuccessful = false;
 			}
 		}
 
-		BookingStatus result = new BookingStatus(bookingSuccessful, sb.toString());
+		BookingStatus result = new BookingStatus(bookingSuccessful, problems.toString());
 
 		return result;
 	}

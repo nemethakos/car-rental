@@ -33,7 +33,8 @@ import com.msci.carrental.client.interpreter.CommandResult;
 import com.msci.carrental.client.util.DecorationType;
 import com.msci.carrental.client.util.TextDecoratorInterface;
 import com.msci.carrental.client.util.Util;
-import com.msci.carrental.service.model.BookingResult;
+import com.msci.carrental.client.ws.BookingResult;
+
 
 public class ConsoleWindow implements ConsoleWindowInterface, TextDecoratorInterface {
 

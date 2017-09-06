@@ -1,15 +1,18 @@
 package com.msci.carrental.client.interpreter.command;
 
+
 import java.util.Date;
 import java.util.List;
 
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
 import com.msci.carrental.client.util.Util;
-import com.msci.carrental.service.CarRentalServiceInterface;
-import com.msci.carrental.service.model.BookingRequest;
-import com.msci.carrental.service.model.CarType;
-import com.msci.carrental.service.model.Country;
+import com.msci.carrental.client.ws.BookingRequest;
+import com.msci.carrental.client.ws.CarRentalServiceInterface;
+import com.msci.carrental.client.ws.CarType;
+import com.msci.carrental.client.ws.Country;
+
+
 
 public class StressTestCommand implements CommandHandlerInterface {
 	private static final int NUMBER_OF_BOOKINGS = 100;
@@ -51,7 +54,7 @@ public class StressTestCommand implements CommandHandlerInterface {
 		Date startDate = new Date(Util.getRandomMonthInterval(System.currentTimeMillis()));
 		Date endDate = new Date(Util.getRandomMonthInterval(startDate.getTime()));
 		List<Country> countries = Util.getRandomCountryList();
-		BookingRequest result = new BookingRequest(carType, startDate, endDate, countries);
+		BookingRequest result = Util.getBookingRequest(countries, carType, startDate, endDate);
 		return result;
 	}
 

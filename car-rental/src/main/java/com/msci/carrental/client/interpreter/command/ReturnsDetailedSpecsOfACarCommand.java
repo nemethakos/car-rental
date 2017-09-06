@@ -7,9 +7,9 @@ import java.util.List;
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
 import com.msci.carrental.client.util.Util;
-import com.msci.carrental.service.CarRentalServiceInterface;
-import com.msci.carrental.service.model.CarSpecification;
-import com.msci.carrental.service.model.CarType;
+import com.msci.carrental.client.ws.CarRentalServiceInterface;
+import com.msci.carrental.client.ws.CarSpecification;
+import com.msci.carrental.client.ws.CarType;
 
 public class ReturnsDetailedSpecsOfACarCommand implements CommandHandlerInterface {
 	private CarRentalServiceInterface service;
@@ -47,8 +47,8 @@ public class ReturnsDetailedSpecsOfACarCommand implements CommandHandlerInterfac
 				result.addMessage("Group code: " + carSpecification.getGroup());
 				result.addMessage("Example car: " + carSpecification.getExample());
 				result.addMessage("Number of passangers: " + carSpecification.getNumberOfPassangers());
-				result.addMessage("Number of suitcases (small/large)" + carSpecification.getNumberOfSmallSuitcases() + "/"
-						+ carSpecification.getNumberOfLargeSuitcases());
+				result.addMessage("Number of suitcases (small/large)" + carSpecification.getNumberOfSmallSuitcases()
+						+ "/" + carSpecification.getNumberOfLargeSuitcases());
 			}
 		}
 		return result;
@@ -76,7 +76,7 @@ public class ReturnsDetailedSpecsOfACarCommand implements CommandHandlerInterfac
 
 	@Override
 	public String getTagLine() {
-		
+
 		return "Returns the detailed specification of a car type";
 	}
 

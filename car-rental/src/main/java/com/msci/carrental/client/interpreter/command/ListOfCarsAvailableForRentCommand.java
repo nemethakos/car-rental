@@ -4,7 +4,8 @@ import java.util.List;
 
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
-import com.msci.carrental.service.CarRentalServiceInterface;
+import com.msci.carrental.client.ws.CarRentalServiceInterface;
+
 
 public class ListOfCarsAvailableForRentCommand implements CommandHandlerInterface {
 	private CarRentalServiceInterface service;
@@ -24,7 +25,9 @@ public class ListOfCarsAvailableForRentCommand implements CommandHandlerInterfac
 		result.addMessage("List of car type codes available for rent:");
 		service.getAvailableCarsForRental().stream().forEach(
 				carType->result.addMessage(
-						carType.getCarType().name()));
+						"Type: " + carType.getCarType().name() + 
+						", Country: " + carType.getCountry() + 
+						", Number Plate:" + carType.getNumberPlate()));
 		
 		return result ;
 	}
@@ -41,7 +44,7 @@ public class ListOfCarsAvailableForRentCommand implements CommandHandlerInterfac
 	@Override
 	public String getTagLine() {
 
-		return "Returns the list of available car types for rent";
+		return "Returns the list of available car types/instances for rent";
 	}
 
 }

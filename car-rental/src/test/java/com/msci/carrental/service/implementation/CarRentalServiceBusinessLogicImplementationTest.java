@@ -17,7 +17,7 @@ public class CarRentalServiceBusinessLogicImplementationTest {
 	
 	@Test
 	public void testGetListOfBookableCars() {
-		List<CarInstance> cars = imp.generateCarInstances();
+		List<CarInstance> cars = CarRentalServiceBusinessLogicImplementation.generateCarInstances();
 		assertNotNull(cars);
 		log.info(cars.toString());
 	}
