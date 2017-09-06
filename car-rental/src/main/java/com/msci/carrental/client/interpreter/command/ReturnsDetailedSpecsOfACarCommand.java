@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.msci.carrental.client.interpreter.BookingHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
 import com.msci.carrental.client.util.Util;
@@ -78,6 +79,10 @@ public class ReturnsDetailedSpecsOfACarCommand implements CommandHandlerInterfac
 	public String getTagLine() {
 
 		return "Returns the detailed specification of a car type";
+	}
+
+	@Override
+	public void setBookingHandler(BookingHandlerInterface bookingHandlerInterface) {
 	}
 
 }

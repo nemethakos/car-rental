@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import com.msci.carrental.client.interpreter.BookingHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
 import com.msci.carrental.client.util.Util;
@@ -36,7 +37,7 @@ public class BookACarCommand implements CommandHandlerInterface {
 		if (!result.isError()) {
 			CarType carType = Util.getCarTypeFromCarTypeCode(parameters.get(0));
 			Date startDate = Util.parseDate(result, parameters.get(1),
-					"Invalid start date: '{0}'. Valid date format: "+Util.DATE_FORMAT_STRING + " (e.g.: 20170826)");
+					"Invalid start date: '{0}'. Valid date format: " + Util.DATE_FORMAT_STRING + " (e.g.: 20170826)");
 			Date endDate = Util.parseDate(result, parameters.get(2),
 					"Invalid end date: '{0}'. Valid date format: yyyyMMdd (e.g.: 20170901)");
 			if (parameters.size() > 3) {
@@ -46,10 +47,17 @@ public class BookACarCommand implements CommandHandlerInterface {
 				BookingRequest bookingRequest = Util.getBookingRequest(countries, carType, startDate, endDate);
 
 				long serviceResult = service.bookACar(bookingRequest);
+				addBookingIdToThePollingQueue(serviceResult);
 				result.addMessage("Booking request queued with reference id: " + serviceResult);
 			}
 		}
 		return result;
+	}
+
+	public void addBookingIdToThePollingQueue(long serviceResult) {
+		if (bookingHandlerInterface != null) {
+			bookingHandlerInterface.addBookingIdToThePollerQueue(serviceResult);
+		}
 	}
 
 	@Override
@@ -59,14 +67,17 @@ public class BookACarCommand implements CommandHandlerInterface {
 		result.add(" *car codes: " + String.join(", ", Util.getListOfCarTypeCodes()));
 		result.add(" **yyyyMMdd");
 		result.add(" ***countries (optional): " + String.join(", ", Util.getCountryList()));
-		result.addAll(
-				Arrays.asList(". Example: " + Util.getCodeText("book " + CarType.values()[0] + " " + "20180101 20180130 hu de")
-						+ " " + Util.getItalicText("(you can copy and paste this to command line.)")));
+		result.addAll(Arrays.asList(
+				". Example: " + Util.getCodeText("book " + CarType.values()[0] + " " + "20180101 20180130 hu de") + " "
+						+ Util.getItalicText("(you can copy and paste this to command line.)")));
 		/*
-		result.add(Util.getItalicText("Note: ") + "Booking for " + CarRentalServiceInterface.INLAND_COUNTRY + " takes "
-				+ CarRentalServiceInterface.BOOKING_DELAY_FOR_INLAND_IN_SECONDS
-				+ "s; if there is another country in the country list, the booking takes "
-				+ CarRentalServiceInterface.BOOKING_DELAY_FOR_FOREIGN_COUNTRIES_IN_SECONDS + "s");*/
+		 * result.add(Util.getItalicText("Note: ") + "Booking for " +
+		 * CarRentalServiceInterface.INLAND_COUNTRY + " takes " +
+		 * CarRentalServiceInterface.BOOKING_DELAY_FOR_INLAND_IN_SECONDS +
+		 * "s; if there is another country in the country list, the booking takes " +
+		 * CarRentalServiceInterface.BOOKING_DELAY_FOR_FOREIGN_COUNTRIES_IN_SECONDS +
+		 * "s");
+		 */
 		return result;
 	}
 
@@ -87,6 +98,13 @@ public class BookACarCommand implements CommandHandlerInterface {
 	@Override
 	public String getTagLine() {
 		return "Books a car";
+	}
+
+	private BookingHandlerInterface bookingHandlerInterface;
+
+	@Override
+	public void setBookingHandler(BookingHandlerInterface bookingHandlerInterface) {
+		this.bookingHandlerInterface = bookingHandlerInterface;
 	}
 
 }

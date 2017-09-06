@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import com.msci.carrental.client.interpreter.BookingHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
 import com.msci.carrental.client.util.Util;
@@ -93,6 +94,10 @@ public class HelpCommand implements CommandHandlerInterface {
 	@Override
 	public String getTagLine() {
 		return "Returns help for commands";
+	}
+
+	@Override
+	public void setBookingHandler(BookingHandlerInterface bookingHandlerInterface) {
 	}
 
 }

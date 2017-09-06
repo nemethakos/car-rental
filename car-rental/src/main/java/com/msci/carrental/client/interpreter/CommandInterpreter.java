@@ -4,7 +4,12 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -17,14 +22,17 @@ import com.msci.carrental.client.interpreter.command.ListOfCarsAvailableForRentC
 import com.msci.carrental.client.interpreter.command.ReturnsDetailedSpecsOfACarCommand;
 import com.msci.carrental.client.interpreter.command.StressTestCommand;
 import com.msci.carrental.client.util.Util;
+import com.msci.carrental.client.ws.BookingResult;
 import com.msci.carrental.client.ws.CarRentalServiceInterface;
 import com.msci.carrental.client.ws.WebServiceProxy;
 
-public class CommandInterpreter implements CommandReceiverCallBackInterface {
+public class CommandInterpreter implements CommandReceiverCallBackInterface, BookingHandlerInterface {
+	private Logger log = Logger.getLogger(CommandInterpreter.class.getName());
 	private ConsoleWindowInterface commandWindow;
 	private CarRentalServiceInterface carRentalService;
 	private List<CommandHandlerInterface> commandHandlers;
 	private HelpCommand helpCommand = null;
+	private ConcurrentLinkedDeque<Long> pollerQueue = new ConcurrentLinkedDeque<>();
 
 	private CommandInterpreter(ConsoleWindowInterface commandWindow) {
 		super();
@@ -36,6 +44,29 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface {
 			commandWindow.sendCommandResult(new CommandResult("Error getting Web Service Proxy", true));
 		}
 		initCommandHandlers();
+		initBookingResultPoller(commandWindow);
+	}
+
+	public void initBookingResultPoller(ConsoleWindowInterface commandWindow) {
+		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+		scheduler.scheduleAtFixedRate(pollBookingResults(commandWindow), 1, 1, TimeUnit.SECONDS);
+	}
+
+	public Runnable pollBookingResults(ConsoleWindowInterface commandWindow) {
+		return () -> {
+			List<Long> pollerList = new ArrayList<Long>(pollerQueue);
+			if (!pollerList.isEmpty()) {
+				List<BookingResult> bookingResults = carRentalService.getBookingResultsForIds(pollerList);
+				for (BookingResult bookingResult : bookingResults) {
+					commandWindow.sendBookingResult(bookingResult);
+					pollerQueue.remove(new Long(bookingResult.getReference()));
+				}
+				if (!bookingResults.isEmpty()) {
+					commandWindow
+							.sendCommandResult(new CommandResult("" + bookingResults.size() + " results received"));
+				}
+			}
+		};
 	}
 
 	private void initCommandHandlers() {
@@ -49,7 +80,10 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface {
 		commandHandlers.add(new DisplayAllBookingsCommand());
 		commandHandlers.add(new StressTestCommand());
 
-		commandHandlers.stream().forEach(handler -> handler.setCarRentalService(carRentalService));
+		commandHandlers.stream().forEach(handler -> {
+			handler.setCarRentalService(carRentalService);
+			handler.setBookingHandler(this);
+		});
 
 		printWelcomeMessage();
 	}
@@ -95,7 +129,8 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface {
 				try {
 					result = optional.get().invoke(commandParameters);
 				} catch (Throwable t) {
-					commandWindow.sendCommandResult(new CommandResult("Error executing command: " + t.getMessage(), true));
+					commandWindow
+							.sendCommandResult(new CommandResult("Error executing command: " + t.getMessage(), true));
 				}
 				result.getMessages().add(0, Util.getBoldText("> " + String.join(" ", words)));
 			} else {
@@ -117,6 +152,12 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface {
 		}
 
 		return result;
+	}
+
+	@Override
+	public void addBookingIdToThePollerQueue(long bookingId) {
+		pollerQueue.add(new Long(bookingId));
+		commandWindow.sendCommandResult(new CommandResult("" + pollerQueue.toString(), false));
 	}
 
 }

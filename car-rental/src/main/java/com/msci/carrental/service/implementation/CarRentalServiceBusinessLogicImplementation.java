@@ -218,7 +218,9 @@ public class CarRentalServiceBusinessLogicImplementation implements CarRentalSer
 			} else {
 				for (Long id : bookingIdList) {
 					BookingResult br = bookingResultMap.get(id);
-					result.add(br);
+					if (br != null) {
+						result.add(br);
+					}
 				}
 			}
 			return result;

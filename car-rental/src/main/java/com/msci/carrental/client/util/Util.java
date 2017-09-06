@@ -46,8 +46,6 @@ public class Util {
 				result.addMessage(getBoldText(i.getCountry() + " - " + i.getNumberPlate()));
 			}
 			
-			
-			
 			result.addMessage("");
 		});
 	}

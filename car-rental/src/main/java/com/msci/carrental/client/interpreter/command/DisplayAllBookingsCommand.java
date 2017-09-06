@@ -3,6 +3,7 @@ package com.msci.carrental.client.interpreter.command;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.msci.carrental.client.interpreter.BookingHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
 import com.msci.carrental.client.util.Util;
@@ -56,6 +57,10 @@ public class DisplayAllBookingsCommand implements CommandHandlerInterface {
 	public String getTagLine() {
 
 		return "Returns the list of all bookings";
+	}
+
+	@Override
+	public void setBookingHandler(BookingHandlerInterface bookingHandlerInterface) {
 	}
 
 }

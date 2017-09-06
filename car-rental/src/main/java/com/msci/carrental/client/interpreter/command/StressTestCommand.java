@@ -1,9 +1,9 @@
 package com.msci.carrental.client.interpreter.command;
 
-
 import java.util.Date;
 import java.util.List;
 
+import com.msci.carrental.client.interpreter.BookingHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
 import com.msci.carrental.client.util.Util;
@@ -12,11 +12,10 @@ import com.msci.carrental.client.ws.CarRentalServiceInterface;
 import com.msci.carrental.client.ws.CarType;
 import com.msci.carrental.client.ws.Country;
 
-
-
 public class StressTestCommand implements CommandHandlerInterface {
 	private static final int NUMBER_OF_BOOKINGS = 100;
 	private CarRentalServiceInterface service;
+
 	@Override
 	public void setCarRentalService(CarRentalServiceInterface carRentalServiceInterface) {
 		this.service = carRentalServiceInterface;
@@ -44,7 +43,8 @@ public class StressTestCommand implements CommandHandlerInterface {
 
 	private void doARandomBooking(int i) {
 		BookingRequest bookingRequest = getRandomBookingRequest(i);
-		service.bookACar(bookingRequest);
+		long bookingId = service.bookACar(bookingRequest);
+		addBookingIdToThePollingQueue(bookingId);
 
 	}
 
@@ -71,6 +71,18 @@ public class StressTestCommand implements CommandHandlerInterface {
 	@Override
 	public String getTagLine() {
 		return "Performs a stress test (100 bookings)";
+	}
+	
+	public void addBookingIdToThePollingQueue(long serviceResult) {
+		if (bookingHandlerInterface != null) {
+			bookingHandlerInterface.addBookingIdToThePollerQueue(serviceResult);
+		}
+	}
+	private BookingHandlerInterface bookingHandlerInterface;
+
+	@Override
+	public void setBookingHandler(BookingHandlerInterface bookingHandlerInterface) {
+		this.bookingHandlerInterface = bookingHandlerInterface;
 	}
 
 }

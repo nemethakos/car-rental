@@ -10,6 +10,14 @@ import com.msci.carrental.client.ws.CarRentalServiceInterface;
 public interface CommandHandlerInterface {
 
 	/**
+	 * Set the {@link BookingHandlerInterface} to handle the booking results
+	 * 
+	 * @param bookingHandlerInterface
+	 *            the {@link BookingHandlerInterface}
+	 */
+	void setBookingHandler(BookingHandlerInterface bookingHandlerInterface);
+
+	/**
 	 * Sets the {@link CarRentalServiceInterface} to the command to access the
 	 * services offered by the {@link CarRentalServiceInterface}
 	 * 

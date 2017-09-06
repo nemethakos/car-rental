@@ -2,6 +2,7 @@ package com.msci.carrental.client.interpreter.command;
 
 import java.util.List;
 
+import com.msci.carrental.client.interpreter.BookingHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
 import com.msci.carrental.client.ws.CarRentalServiceInterface;
@@ -45,6 +46,9 @@ public class ListOfCarsAvailableForRentCommand implements CommandHandlerInterfac
 	public String getTagLine() {
 
 		return "Returns the list of available car types/instances for rent";
+	}
+	@Override
+	public void setBookingHandler(BookingHandlerInterface bookingHandlerInterface) {
 	}
 
 }
