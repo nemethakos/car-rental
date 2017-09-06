@@ -1,12 +1,13 @@
 package com.msci.carrental.client.interpreter.command;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
 import com.msci.carrental.client.util.Util;
 import com.msci.carrental.service.CarRentalServiceInterface;
-import com.msci.carrental.service.model.Booking;
+import com.msci.carrental.service.model.BookingResult;
 
 public class DisplayAllBookingsCommand implements CommandHandlerInterface {
 	private CarRentalServiceInterface service;
@@ -28,7 +29,7 @@ public class DisplayAllBookingsCommand implements CommandHandlerInterface {
 		if (!parameters.isEmpty()) {
 			result.addError("No parameters allowed!");
 		} else {
-			List<Booking> allBookings = service.getAllBookings();
+			List<BookingResult> allBookings = service.getBookingResultsForIds(new ArrayList<>());
 			if (allBookings.isEmpty()) {
 				result.addMessage("No bookings yet!");
 			} else {

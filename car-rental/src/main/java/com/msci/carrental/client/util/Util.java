@@ -11,7 +11,6 @@ import java.util.Random;
 import java.util.function.Consumer;
 
 import com.msci.carrental.client.interpreter.CommandResult;
-import com.msci.carrental.service.model.Booking;
 import com.msci.carrental.service.model.BookingRequest;
 import com.msci.carrental.service.model.BookingResult;
 import com.msci.carrental.service.model.CarType;
@@ -19,17 +18,17 @@ import com.msci.carrental.service.model.Country;
 
 public class Util {
 	public static final String DATE_FORMAT_STRING = "yyyyMMdd";
-	
+
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(DATE_FORMAT_STRING);
 
 	public static final long ONE_MONTH_IN_MILLISECONDS = 1000L * 60L * 60L * 24L * 30L;
 
 	private static final Random RANDOM = new Random();
 
-	public static void addAllBookingsTo(CommandResult result, List<Booking> allBookings) {
+	public static void addAllBookingsTo(CommandResult result, List<BookingResult> allBookings) {
 		allBookings.stream().forEach(booking -> {
 			BookingRequest b = booking.getBookingRequest();
-			result.addMessage("Booking Id: " + getBoldText(String.valueOf(booking.getId())));
+			result.addMessage("Booking Id: " + getBoldText(String.valueOf(booking.getReference())));
 			result.addMessage("Car Code Type: " + getBoldText(b.getCarType().name()));
 			result.addMessage("Start Date: " + getBoldText(getDateString(b.getStartDate())));
 			result.addMessage("End Date: " + getBoldText(getDateString(b.getEndDate())));
@@ -39,9 +38,8 @@ public class Util {
 	}
 
 	public static void addBookingResultTo(CommandResult result, BookingResult bookingResult) {
-		Booking booking = new Booking(bookingResult.getReference(), bookingResult.getBookingRequest());
-		List<Booking> bookingList = new ArrayList<Booking>(1);
-		bookingList.add(booking);
+		List<BookingResult> bookingList = new ArrayList<BookingResult>(1);
+		bookingList.add(bookingResult);
 		addAllBookingsTo(result, bookingList);
 	}
 

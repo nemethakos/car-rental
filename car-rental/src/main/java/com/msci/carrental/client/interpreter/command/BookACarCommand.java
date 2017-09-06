@@ -59,7 +59,7 @@ public class BookACarCommand implements CommandHandlerInterface {
 		result.add(" **yyyyMMdd");
 		result.add(" ***countries (optional): " + String.join(", ", Util.getCountryList()));
 		result.addAll(
-				Arrays.asList(". Example: " + Util.getCodeText("book " + CarType.CCMR + " " + "20180101 20180130 hu de")
+				Arrays.asList(". Example: " + Util.getCodeText("book " + CarType.values()[0] + " " + "20180101 20180130 hu de")
 						+ " " + Util.getItalicText("(you can copy and paste this to command line.)")));
 		
 		result.add(Util.getItalicText("Note: ") + "Booking for " + CarRentalServiceInterface.INLAND_COUNTRY + " takes "

@@ -18,7 +18,6 @@ import com.msci.carrental.client.util.Util;
 import com.msci.carrental.service.BookingResultReceiverInterface;
 import com.msci.carrental.service.CarRentalServiceInterface;
 import com.msci.carrental.service.model.BookingResult;
-import com.msci.carrental.service.proxy.CarRentalServiceProxy;
 
 public class CommandInterpreter implements CommandReceiverCallBackInterface, BookingResultReceiverInterface {
 	private ConsoleWindowInterface commandWindow;
@@ -30,8 +29,6 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 		super();
 		this.commandWindow = commandWindow;
 		this.commandWindow.setCommandReceiverCallback(this);
-		carRentalService = CarRentalServiceProxy.getProxy();
-		carRentalService.setBookingResultReceiver(this);
 		initCommandHandlers();
 	}
 

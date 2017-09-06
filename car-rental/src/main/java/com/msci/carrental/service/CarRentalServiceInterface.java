@@ -2,16 +2,22 @@ package com.msci.carrental.service;
 
 import java.util.List;
 
-import com.msci.carrental.service.model.Booking;
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+
 import com.msci.carrental.service.model.BookingRequest;
+import com.msci.carrental.service.model.BookingResult;
+import com.msci.carrental.service.model.CarInstance;
 import com.msci.carrental.service.model.CarSpecification;
 import com.msci.carrental.service.model.CarType;
 import com.msci.carrental.service.model.Country;
 
+@WebService
 public interface CarRentalServiceInterface {
 
 	/**
-	 * Country counts as inland country. Booking for inland country takes {@link #BOOKING_DELAY_FOR_INLAND_IN_SECONDS} seconds.
+	 * Country counts as inland country. Booking for inland country takes
+	 * {@link #BOOKING_DELAY_FOR_INLAND_IN_SECONDS} seconds.
 	 */
 	Country INLAND_COUNTRY = Country.HU;
 
@@ -19,12 +25,12 @@ public interface CarRentalServiceInterface {
 	 * Booking delay for {@link #INLAND_COUNTRY}
 	 */
 	int BOOKING_DELAY_FOR_INLAND_IN_SECONDS = 1;
-	
+
 	/**
 	 * Booking delay for non {@link #INLAND_COUNTRY}
 	 */
 	int BOOKING_DELAY_FOR_FOREIGN_COUNTRIES_IN_SECONDS = 10;
-	
+
 	/**
 	 * Start id for booking ids
 	 */
@@ -35,7 +41,8 @@ public interface CarRentalServiceInterface {
 	 * 
 	 * @return the list of available {@link CarType}s
 	 */
-	List<CarType> getAvailableCarsForRental();
+	@WebMethod
+	List<CarInstance> getAvailableCarsForRental();
 
 	/**
 	 * Returns the {@link CarSpecification} for the given {@link CarType}
@@ -44,7 +51,8 @@ public interface CarRentalServiceInterface {
 	 *            the {@link CarType}
 	 * @return the {@link CarSpecification} for the {@link CarType}
 	 */
-	CarSpecification getDetailedSpecificationForACar(CarType carType);
+	@WebMethod
+	CarSpecification getDetailedSpecificationForACarType(CarType carType);
 
 	/**
 	 * Starts an asynchronous booking process. Returns a reference id.
@@ -53,21 +61,20 @@ public interface CarRentalServiceInterface {
 	 *            the {@link BookingRequest}
 	 * @return the reference id
 	 */
+	@WebMethod
 	long bookACar(BookingRequest bookingRequest);
 
 	/**
-	 * Sets the receiver for the booking results. The booking results are returned
-	 * asynchronously.
+	 * <p>
+	 * Method for the client to poll periodically the status of the booking
+	 * requests.
+	 * <p>
+	 * Returns the list of {@link BookingResult}s for the specified
+	 * <code>bookingIdList</code>. 
 	 * 
-	 * @param bookingResultReceiver
-	 *            the {@link BookingResultReceiverInterface}
+	 * @param bookingIdList
+	 *            the List of Ids
+	 * @return {@link List} of {@link BookingResult}s for the Ids
 	 */
-	void setBookingResultReceiver(BookingResultReceiverInterface bookingResultReceiver);
-
-	/**
-	 * Returns all bookings
-	 * 
-	 * @return all bookings
-	 */
-	List<Booking> getAllBookings();
+	List<BookingResult> getBookingResultsForIds(List<Long> bookingIdList);
 }

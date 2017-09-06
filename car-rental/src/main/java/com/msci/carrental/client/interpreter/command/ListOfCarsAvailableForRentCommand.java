@@ -24,7 +24,7 @@ public class ListOfCarsAvailableForRentCommand implements CommandHandlerInterfac
 		result.addMessage("List of car type codes available for rent:");
 		service.getAvailableCarsForRental().stream().forEach(
 				carType->result.addMessage(
-						carType.name()));
+						carType.getCarType().name()));
 		
 		return result ;
 	}

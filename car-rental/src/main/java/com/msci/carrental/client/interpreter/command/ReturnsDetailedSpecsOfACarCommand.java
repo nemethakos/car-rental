@@ -41,15 +41,14 @@ public class ReturnsDetailedSpecsOfACarCommand implements CommandHandlerInterfac
 			if (carType == null) {
 				result.addError("Unknown car code: " + carCode);
 			} else {
-				CarSpecification carSpecification = service.getDetailedSpecificationForACar(carType);
+				CarSpecification carSpecification = service.getDetailedSpecificationForACarType(carType);
 				result.addMessage("Car specification for car code: " + carCode);
-				CarType info = carSpecification.getCarType();
-				result.addMessage("Description: " + info.getDescription());
-				result.addMessage("Group code: " + info.getGroup());
-				result.addMessage("Example car: " + info.getExample());
-				result.addMessage("Number of passangers: " + info.getNumberOfPassangers());
-				result.addMessage("Number of suitcases (small/large)" + info.getNumberOfSmallSuitcases() + "/"
-						+ info.getNumberOfLargeSuitcases());
+				result.addMessage("Description: " + carSpecification.getDescription());
+				result.addMessage("Group code: " + carSpecification.getGroup());
+				result.addMessage("Example car: " + carSpecification.getExample());
+				result.addMessage("Number of passangers: " + carSpecification.getNumberOfPassangers());
+				result.addMessage("Number of suitcases (small/large)" + carSpecification.getNumberOfSmallSuitcases() + "/"
+						+ carSpecification.getNumberOfLargeSuitcases());
 			}
 		}
 		return result;
