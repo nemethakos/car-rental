@@ -8,6 +8,9 @@ import com.msci.carrental.client.interpreter.CommandInterpreter;
  */
 public class Application {
 
+	/**
+	 * 
+	 */
 	private ConsoleWindow consoleWindow;
 
 	public Application() {
