@@ -66,7 +66,6 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 		return () -> {
 			List<Long> pollerList = new ArrayList<Long>(pollerQueue);
 			if (!pollerList.isEmpty()) {
-				log.info(pollerList.toString());
 				List<BookingResult> bookingResults = carRentalService.getBookingResultsForIds(pollerList);
 				for (BookingResult bookingResult : bookingResults) {
 					commandWindow.sendBookingResult(bookingResult);
