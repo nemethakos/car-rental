@@ -7,7 +7,7 @@ Starting the Server: **mvn exec:java@server (or startserver.bat)**
 Start the client: **mvn exec:java@client (or startclient.bat)**        
 
 Steps to run:     
-1. Start the server
+1. Start the server (For SOAP testing, the URL is: http://localhost:8080/WS/CarRental?wsdl )
 2. Start the client (multiple clients can be started on the same machine)
 
 Type of results from the server:    
@@ -27,10 +27,10 @@ car codes: <pre>M, C, E</pre>
 * **book car-code from-date to-date [country1 country2 ... countryN]** - Books a car   
 
     car codes: <pre>M, C, E</pre>   
-    from-date, to-date format: <pre>yyyyMMdd</pre>      
+    from-date, to-date format: <pre>yyyyMMdd</pre> The earliest start date is the current date, end date should be at least one day after start date, otherwise SOAP fault will be returned.       
     countries (optional): <pre>HU, DE, AT, HR</pre>     
-    Example: <pre>book CCMR 20180101 20180130 hu de</pre>     
-    Note: Booking for country <code>HU</code> (default) takes 1 second; if there is another country in the country list, the booking takes 10 seconds        
+    Example: <pre>book c 20180101 20180130 hu de</pre>     
+    Note: Booking for country <code>HU</code> (default) takes at least 1 second; if there is another country in the country list, the booking takes at least 10 seconds        
 
 * **bookings** - Returns the list of all bookings
 
