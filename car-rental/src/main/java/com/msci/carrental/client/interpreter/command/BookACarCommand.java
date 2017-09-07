@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.ws.soap.SOAPFaultException;
+
 import com.msci.carrental.client.interpreter.BookingHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
@@ -46,9 +48,13 @@ public class BookACarCommand implements CommandHandlerInterface {
 			if (!result.isError()) {
 				BookingRequest bookingRequest = Util.getBookingRequest(countries, carType, startDate, endDate);
 
-				long serviceResult = service.bookACar(bookingRequest);
-				addBookingIdToThePollingQueue(serviceResult);
-				result.addMessage("Booking request queued with reference id: " + serviceResult);
+				try {
+					long serviceResult = service.bookACar(bookingRequest);
+					addBookingIdToThePollingQueue(serviceResult);
+					result.addMessage("Booking request queued with reference id: " + serviceResult);
+				} catch (SOAPFaultException sfe) {
+					Util.handleSoapFault(bookingRequest, sfe, result);
+				}
 			}
 		}
 		return result;

@@ -1,15 +1,14 @@
 package com.msci.carrental.client.interpreter;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -36,15 +35,26 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 
 	private CommandInterpreter(ConsoleWindowInterface commandWindow) {
 		super();
+		boolean failedToStart = false;
 		this.commandWindow = commandWindow;
 		this.commandWindow.setCommandReceiverCallback(this);
 		try {
 			carRentalService = WebServiceProxy.getInstance();
-		} catch (MalformedURLException e) {
-			commandWindow.sendCommandResult(new CommandResult("Error getting Web Service Proxy", true));
+			commandWindow.sendCommandResult(new CommandResult(
+					"Successfully Connected to: " + Util.getBoldText(WebServiceProxy.getConnectionURL()), false));
+			
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "Error creating Web Service Proxy", e);
+			commandWindow.sendCommandResult(new CommandResult(
+					"Error creating Web Service Proxy. The CarRental Web Service should be started first in order the client to work! Start the server then restart the client!",
+					true));
+			failedToStart = true;
 		}
 		initCommandHandlers();
 		initBookingResultPoller(commandWindow);
+		if (!failedToStart) {
+			printWelcomeMessage();
+		}
 	}
 
 	public void initBookingResultPoller(ConsoleWindowInterface commandWindow) {
@@ -56,6 +66,7 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 		return () -> {
 			List<Long> pollerList = new ArrayList<Long>(pollerQueue);
 			if (!pollerList.isEmpty()) {
+				log.info(pollerList.toString());
 				List<BookingResult> bookingResults = carRentalService.getBookingResultsForIds(pollerList);
 				for (BookingResult bookingResult : bookingResults) {
 					commandWindow.sendBookingResult(bookingResult);
@@ -85,7 +96,6 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 			handler.setBookingHandler(this);
 		});
 
-		printWelcomeMessage();
 	}
 
 	private void printWelcomeMessage() {
@@ -129,8 +139,9 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 				try {
 					result = optional.get().invoke(commandParameters);
 				} catch (Throwable t) {
-					commandWindow
-							.sendCommandResult(new CommandResult("Error executing command: " + t.getMessage(), true));
+
+					commandWindow.sendCommandResult(
+							new CommandResult("Error executing command: " + t + " " + t.getMessage(), true));
 				}
 				result.getMessages().add(0, Util.getBoldText("> " + String.join(" ", words)));
 			} else {
@@ -157,7 +168,6 @@ public class CommandInterpreter implements CommandReceiverCallBackInterface, Boo
 	@Override
 	public void addBookingIdToThePollerQueue(long bookingId) {
 		pollerQueue.add(new Long(bookingId));
-		commandWindow.sendCommandResult(new CommandResult("" + pollerQueue.toString(), false));
 	}
 
 }

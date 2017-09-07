@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -14,12 +15,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import javax.xml.soap.SOAPFault;
+import javax.xml.ws.soap.SOAPFaultException;
 
 import com.msci.carrental.client.interpreter.CommandResult;
 import com.msci.carrental.client.ws.BookingRequest;
 import com.msci.carrental.client.ws.BookingResult;
+import com.msci.carrental.client.ws.BookingStatus;
 import com.msci.carrental.client.ws.CarInstance;
 import com.msci.carrental.client.ws.CarType;
 import com.msci.carrental.client.ws.Country;
@@ -35,17 +40,45 @@ public class Util {
 
 	private static Logger log = Logger.getLogger(Util.class.getName());
 
+	public static Calendar toCalendar(Date date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		return cal;
+	}
+
+	public static Date normalizeDate(Date date) {
+		Calendar calendar = toCalendar(date);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		Date result = calendar.getTime();
+		return result;
+	}
+
 	public static void addAllBookingsTo(CommandResult result, List<BookingResult> allBookings) {
 		allBookings.stream().forEach(booking -> {
-			BookingRequest b = booking.getBookingRequest();
-			result.addMessage("Booking Id: " + getBoldText(String.valueOf(booking.getReference())));
-			result.addMessage("Car Code Type: " + getBoldText(b.getCarType().name()));
-			result.addMessage(getBoldText(getDateString(b.getStartDate())) + " - " + getBoldText(getDateString(b.getEndDate())));
-			
-			for (CarInstance i: booking.getCarInstances()) {
-				result.addMessage(getBoldText(i.getCountry() + " - " + i.getNumberPlate()));
+			BookingRequest br = booking.getBookingRequest();
+			BookingStatus bs = booking.getBookingStatus();
+
+			if (bs.isSuccessfulBooking()) {
+				result.addMessage(getBoldText("Successful booking!"));
+			}
+			else {
+				result.addMessage(getBoldText("Unsuccessful booking!"));
 			}
 			
+			result.addMessage("Booking Id: " + getBoldText(String.valueOf(booking.getReference())));
+			result.addMessage("Booking interval: " + getBoldText(getDateString(br.getStartDate())) + " - "
+					+ getBoldText(getDateString(br.getEndDate())));
+			result.addMessage("Desired car type: " + getBoldText(br.getCarType().name()));
+			if (bs.isSuccessfulBooking()) {
+				for (CarInstance i : booking.getCarInstances()) {
+					result.addMessage("Country: "+ getBoldText(""+i.getCountry()) + " - Number Plate: " + getBoldText(i.getNumberPlate()));
+				}
+			} else {
+				result.addMessage("Reason of unsuccessful booking: " + getBoldText("" + bs.getDescription()));
+			}
 			result.addMessage("");
 		});
 	}
@@ -137,7 +170,17 @@ public class Util {
 	}
 
 	public static String getDateString(XMLGregorianCalendar xmlGregorianCalendar) {
-		return xmlGregorianCalendar.toString();
+		XMLGregorianCalendar calendar = null;
+		try {
+			calendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(xmlGregorianCalendar.getYear(),
+					xmlGregorianCalendar.getMonth(), xmlGregorianCalendar.getDay(), DatatypeConstants.FIELD_UNDEFINED,
+					DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED,
+					DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED);
+		} catch (DatatypeConfigurationException e) {
+			log.log(Level.SEVERE, "Error converting XMLGregorianCalendar to String", e);
+		}
+
+		return calendar.toString();
 	}
 
 	public static String getHeadText(String text) {
@@ -227,6 +270,20 @@ public class Util {
 		bookingRequest.setEndDate(getXmlGregorianCalendar(endDate));
 		bookingRequest.getCountries().addAll(countries);
 		return bookingRequest;
+	}
+
+	public static void handleSoapFault(BookingRequest bookingRequest, SOAPFaultException sfe,
+			CommandResult commandResult) {
+		SOAPFault fault = sfe.getFault();
+		String faultString = null;
+		if (fault != null) {
+			faultString = fault.getFaultString();
+		}
+		commandResult
+				.addError("Soap Fault received for booking: Car Type: " + bookingRequest.getCarType() + ", Countries: "
+						+ bookingRequest.getCountries() + ", Dates: " + getDateString(bookingRequest.getStartDate())
+						+ " - " + getDateString(bookingRequest.getEndDate()) + " , Fault: " + faultString);
+
 	}
 
 }

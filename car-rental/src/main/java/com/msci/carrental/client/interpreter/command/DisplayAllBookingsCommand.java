@@ -56,7 +56,7 @@ public class DisplayAllBookingsCommand implements CommandHandlerInterface {
 	@Override
 	public String getTagLine() {
 
-		return "Returns the list of all bookings";
+		return "Returns the list of all bookings from the server (both successful and unsuccessful)";
 	}
 
 	@Override

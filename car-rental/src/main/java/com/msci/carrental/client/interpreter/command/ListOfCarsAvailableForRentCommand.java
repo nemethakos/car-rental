@@ -5,6 +5,7 @@ import java.util.List;
 import com.msci.carrental.client.interpreter.BookingHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
+import com.msci.carrental.client.util.Util;
 import com.msci.carrental.client.ws.CarRentalServiceInterface;
 
 
@@ -23,12 +24,12 @@ public class ListOfCarsAvailableForRentCommand implements CommandHandlerInterfac
 	@Override
 	public CommandResult invoke(List<String> parameters) {
 		CommandResult result = new CommandResult();
-		result.addMessage("List of car type codes available for rent:");
+		result.addMessage("List of car instances by country available for rent:");
 		service.getAvailableCarsForRental().stream().forEach(
 				carType->result.addMessage(
-						"Type: " + carType.getCarType().name() + 
-						", Country: " + carType.getCountry() + 
-						", Number Plate:" + carType.getNumberPlate()));
+						"Type: " + Util.getBoldText(carType.getCarType().name()) + 
+						", Country: " + Util.getBoldText(""+carType.getCountry()) + 
+						", Number Plate:" + Util.getBoldText(carType.getNumberPlate())));
 		
 		return result ;
 	}

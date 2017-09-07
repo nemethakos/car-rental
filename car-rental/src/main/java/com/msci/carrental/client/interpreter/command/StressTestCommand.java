@@ -3,6 +3,8 @@ package com.msci.carrental.client.interpreter.command;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.ws.soap.SOAPFaultException;
+
 import com.msci.carrental.client.interpreter.BookingHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandHandlerInterface;
 import com.msci.carrental.client.interpreter.CommandResult;
@@ -34,25 +36,32 @@ public class StressTestCommand implements CommandHandlerInterface {
 			result.addError("No parameters allowed!");
 		} else {
 			for (int i = 0; i < NUMBER_OF_BOOKINGS; i++) {
-				doARandomBooking(i);
+				doARandomBooking(i, result);
 			}
 			result.addMessage(String.valueOf(NUMBER_OF_BOOKINGS) + " bookings sent...");
 		}
 		return result;
 	}
 
-	private void doARandomBooking(int i) {
+	private void doARandomBooking(int i, CommandResult commandResult) {
 		BookingRequest bookingRequest = getRandomBookingRequest(i);
-		long bookingId = service.bookACar(bookingRequest);
-		addBookingIdToThePollingQueue(bookingId);
+		
+		long bookingId = 0;
+		try {
+			bookingId = service.bookACar(bookingRequest);
+			addBookingIdToThePollingQueue(bookingId);
+		} catch (SOAPFaultException sfe) {
+			Util.handleSoapFault(bookingRequest, sfe, commandResult);
+		}
+		
 
 	}
 
 	private static BookingRequest getRandomBookingRequest(int i) {
 
 		CarType carType = Util.getARandomCarType();
-		Date startDate = new Date(Util.getRandomMonthInterval(System.currentTimeMillis()));
-		Date endDate = new Date(Util.getRandomMonthInterval(startDate.getTime()));
+		Date startDate = Util.normalizeDate(new Date(Util.getRandomMonthInterval(System.currentTimeMillis())));
+		Date endDate = Util.normalizeDate(new Date(Util.getRandomMonthInterval(startDate.getTime())));
 		List<Country> countries = Util.getRandomCountryList();
 		BookingRequest result = Util.getBookingRequest(countries, carType, startDate, endDate);
 		return result;

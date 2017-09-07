@@ -30,9 +30,6 @@ public class Util {
 		if (endDate == null) {
 			errors.add("endDate  was invalid or not specified. Valid format is: YYYY-MM-DD (e.g.: 2017-09-06 )");
 		}
-/*		if (bookingRequest.getCountries() == null) {
-			errors.add("countries was invalid or not specified. Valid values are: " + getValidCountries());
-		}*/
 
 		if (startDate != null && endDate != null) {
 

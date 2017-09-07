@@ -29,6 +29,8 @@ public class CarRentalServiceBusinessLogicImplementation implements CarRentalSer
 
 	protected static final int THREAD_POOL_SIZE = 20;
 
+	private static final int NUMBER_OF_CAR_INSTANCES_PER_CAR_TYPE = 5;
+
 	protected AtomicLong bookingIdGenerator = new AtomicLong();
 
 	protected ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(THREAD_POOL_SIZE);
@@ -57,11 +59,13 @@ public class CarRentalServiceBusinessLogicImplementation implements CarRentalSer
 		List<CarInstance> result = new ArrayList<>();
 
 		for (Country country : Country.values()) {
-			int index = 0;
+			int index = 1;
 			for (CarType carType : CarType.values()) {
-				String numberPlate = country.name() + index++;
-				CarInstance car = new CarInstance(carType, country, numberPlate);
-				result.add(car);
+				for (int j = 0; j < NUMBER_OF_CAR_INSTANCES_PER_CAR_TYPE; j++) {
+					String numberPlate = country.name() + index++;
+					CarInstance car = new CarInstance(carType, country, numberPlate);
+					result.add(car);
+				}
 			}
 		}
 
